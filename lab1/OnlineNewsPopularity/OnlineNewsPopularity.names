@@ -33,9 +33,9 @@
       method.  See their article for more details on how the relative
       performance values were set.
 
-5. Number of Instances: 39797 
+5. Number of Instances: 39797
 
-6. Number of Attributes: 61 (58 predictive attributes, 2 non-predictive, 
+6. Number of Attributes: 61 (58 predictive attributes, 2 non-predictive,
                              1 goal field)
 
 7. Attribute Information:

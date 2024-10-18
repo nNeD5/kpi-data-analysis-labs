@@ -9,7 +9,7 @@ df = pd.read_csv("OnlineNewsPopularity/OnlineNewsPopularity.csv", skipinitialspa
 # it's not fair to compare shares number for 8 and 30 days articles
 df["shares_per_day"] = df["shares"] / df["timedelta"]
 
-# drop not useful(for now) data 
+# drop not useful(for now) data
 df = df.drop(columns=["url", "timedelta", "weekday_is_monday", "weekday_is_tuesday", "weekday_is_wednesday",
                       "weekday_is_thursday", "weekday_is_friday", "weekday_is_saturday", "weekday_is_sunday", 
                       "is_weekend", "shares"])
@@ -35,10 +35,11 @@ if len(null_indexes) > 0:
     df = df.dropna()
 
 # multiple columns data_channel_is_* -> one column with multiple values
+labels = dict(zip(targets, ["Lifestyle", "Entertainment", "Business", "Social Media", "Tech", "World"]))
 df["data_channel"] = df.apply(lambda row: [col for col in df.columns if row[col] and col.startswith("data_channel_")][0], axis=1)
-df["data_channel"] = df["data_channel"].str.replace("data_channel_is_", "")
+for key in labels.keys():
+    df.loc[df["data_channel"] == key, "data_channel"] = labels[key]
 df = df.drop(columns=[col for col in df.columns if col.startswith("data_channel_is")])
-
 
 df.info()
 df.to_csv("OnlineNewsPopularity/OnlineNewsPopularity_classification_lab1.csv", index=False)
