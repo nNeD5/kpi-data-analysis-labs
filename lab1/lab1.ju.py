@@ -39,7 +39,7 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 
 plt.style.use("default")
 # %% [markdown]
-### Preate data
+### Prepare data
 # %%
 df = pd.read_csv("OnlineNewsPopularity/OnlineNewsPopularity.csv",
                  skipinitialspace=True)
@@ -52,7 +52,7 @@ df = df.drop(columns=["url", "timedelta", "shares",
                       "LDA_02", "LDA_03", "LDA_04"])
 
 # choose target and features
-targets=[
+targets = [
     "data_channel_is_lifestyle",
     "data_channel_is_entertainment",
     "data_channel_is_bus",
