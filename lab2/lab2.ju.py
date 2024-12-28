@@ -113,7 +113,7 @@ def quantize_image(image, depth: int):
     quantized_image = kmeans.cluster_centers_[labels].reshape(w, h, d)
     fig = trace_quantized = px.imshow(quantized_image)
     fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
-    fig.update_xaxes(title=f"{depth} quantize level", showticklabels=False)
+    fig.update_xaxes(title="Origianl image", showticklabels=False)
     fig.update_yaxes(showticklabels=False)
     iplot(fig)
 
