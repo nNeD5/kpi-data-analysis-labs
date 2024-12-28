@@ -1,10 +1,10 @@
 # pyright: basic
-#%% [markdown]
+# %% [markdown]
 r"""
 # Lab Work #3
 ### Nedozhdii Oleksii FF-31mn
 """
-#%% [markdown]
+# %% [markdown]
 r"""
 # Imports
 """
@@ -22,14 +22,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 pio.templates.default = "plotly_dark"
-pio.renderers.default = "jupyterlabf"
+pio.renderers.default = "jupyterlab"
 
-#%% [markdown]
+# %% [markdown]
 r"""
 # 1. Повнозв'язані нейронні мережі.
 Вирішіть завдання класифікації даних, з якими ви працювали в лабораторній №1 за допомогою повнозв’язаної нейромережі прямого поширення (fully connected feed-forward network). Результати порівняйте з одержаними раніше.
 """
-#%% [markdown]
+# %% [markdown]
 r"""
 ## Load and prepare dataset 'OnlineNewsPopularity'
 """
