@@ -80,8 +80,8 @@ img_pred_ds = keras.preprocessing.image_dataset_from_directory(
     pred_dir, seed=42, image_size=img_size, shuffle=False
 )
 
-img_true_labels = img_test_ds.classes
-img_train_class_names = list(img_train_ds.class_indices.keys())
+img_true_labels = img_test_ds.class_names
+img_train_class_names = img_train_ds.class_names
 img_num_classes = len(img_train_class_names)
 print(f"Classes: {img_train_class_names}")
 print(f"Classes number: {img_num_classes}")

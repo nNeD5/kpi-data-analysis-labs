@@ -1,10 +1,11 @@
 # pyright: basic
-r"""°°°
+# %% [markdown]
+r"""
 # Lab Work #3
 ### Nedozhdii Oleksii FF-31mn
-°°°"""
+"""
 
-# %%
+# %% [markdown]
 r"""°°°
 # Imports
 °°°"""
@@ -29,15 +30,15 @@ from transformers import (
     TrainingArguments,
 )
 
-# %%
-r"""°°°
+# %% [markdown]
+r"""
 # 3. Рекурентні нейронні мережі
 Вирішіть задачу класифікації текстів (з якими ви працювали в лабораторній № 2) за допомогою рекурентної нейромережі двома способами:
 а) навчить мережу і embedding шар з нуля (from scratch)
 б) використовуючи pretrained word embeddings
-°°°"""
+"""
 
-# %%
+# %% [markdown]
 r"""°°°
 ## Load and prepare text data
 °°°"""
@@ -105,6 +106,19 @@ formated_txt_train_ds = raw_txt_train_ds.map(datatset_standardization)
 formated_txt_test_ds = raw_txt_test_ds.map(datatset_standardization)
 formated_txt_val_ds = raw_txt_val_ds.map(datatset_standardization)
 
+formated_txt_train_ds = formated_txt_train_ds.unbatch().filter(lambda x, y: tf.strings.length(x) > 0)
+formated_txt_test_ds = formated_txt_test_ds.unbatch().filter(lambda x, y: tf.strings.length(x) > 0)
+formated_txt_val_ds = formated_txt_val_ds.unbatch().filter(lambda x, y: tf.strings.length(x) > 0)
+
+formated_txt_train_ds = formated_txt_train_ds.batch(16)
+formated_txt_test_ds = formated_txt_test_ds.batch(16)
+formated_txt_val_ds = formated_txt_val_ds.batch(16)
+# %%
+
+for item in formated_txt_train_ds.unbatch():
+    if item[0].numpy().decode("utf-8") == "":
+        print("Spot emtpy line")
+
 # %%
 
 i = raw_txt_train_ds.unbatch().as_numpy_iterator()
@@ -115,7 +129,7 @@ del i
 
 # %%
 
-i = formated_txt_train_ds.unbatch().as_numpy_iterator()
+i = formated_txt_train_ds.as_numpy_iterator()
 print(next(i), end="\n\n")
 print(next(i), end="\n\n")
 print(next(i), end="\n\n")
@@ -146,6 +160,8 @@ def vectorize_text(text, label):
 train_vec_txt_ds = formated_txt_train_ds.map(vectorize_text)
 val_vec_txt_ds = formated_txt_val_ds.map(vectorize_text)
 test_vec_txt_ds = formated_txt_test_ds.map(vectorize_text)
+
+print(next(train_vec_txt_ds.as_numpy_iterator()))
 
 # %%
 
@@ -203,7 +219,7 @@ emb_network_report = classification_report(txt_true_labels, y_predict_emb)
 
 print(f"Score: {emb_network_score}")
 
-# %%
+# %% [markdown]
 r"""°°°
 ## Bert model
 °°°"""
@@ -215,73 +231,30 @@ bert_model = BertForSequenceClassification.from_pretrained(
 )
 
 # %%
-
-train_text = formated_txt_train_ds.unbatch().map(lambda x, y: x)
-val_text = formated_txt_val_ds.unbatch().map(lambda x, y: x)
-test_text = formated_txt_test_ds.unbatch().map(lambda x, y: x)
-
-train_text = list(np.fromiter(train_text.as_numpy_iterator(), dtype=((str, 512))))
-val_text = list(np.fromiter(val_text.as_numpy_iterator(), dtype=((str, 512))))
-test_text = list(np.fromiter(test_text.as_numpy_iterator(), dtype=((str, 512))))[:50]
-
-txt_vec_bert_train_ds = bert_tokenizer(train_text, truncation=True, padding=True, return_tensors="pt")
-txt_vec_bert_val_ds = bert_tokenizer(val_text, truncation=True, padding=True, return_tensors="pt")
-txt_vec_bert_test_ds = bert_tokenizer(test_text, truncation=True, padding=True, return_tensors="pt")
+formated_txt_bert_ds = formated_txt_train_ds.unbatch()
+text = formated_txt_bert_ds.map(lambda x, y: x)
+text = list(np.fromiter(text.as_numpy_iterator(), dtype=((str, 512))))[:20]
+txt_vec_bert_ds = bert_tokenizer(text, truncation=True, padding=True, return_tensors="pt")
 
 # %%
 
-# training_args = TrainingArguments(
-#     output_dir="./results",
-#     num_train_epochs=7,
-#     per_device_train_batch_size=16,
-#     per_device_eval_batch_size=64,
-#     warmup_steps=500,
-#     weight_decay=1e-5,
-#     logging_dir="./logs",
-#     eval_steps=100,
-# )
-#
-# bert_trainer = Trainer(
-#     model=bert_model,
-#     args=training_args,
-#     train_dataset=txt_vec_bert_train_ds,
-#     eval_dataset=txt_vec_bert_val_ds,
-#     # processing_class=bert_tokenizer,
-# )
-#
-# %%
-
-# bert_trainer.train()
-
-# %%
 bert_model.eval()
-bert_output = bert_model(**txt_vec_bert_test_ds)
+bert_output = bert_model(**txt_vec_bert_ds)
 
 # %%
 
-last_hidden_states = bert_output[0]
-print(*bert_output)
+predictions = tf.nn.softmax(bert_output[0].detach(), axis=-1)
 
 # %%
+
+formated_txt_test_list = list(formated_txt_bert_ds.as_numpy_iterator())[:20]
+print(formated_txt_test_list[0])
+print([txt_class_names[i[1]] for i in formated_txt_test_list])
 
 print(txt_class_names)
-print(f"True {" " * 40} Predicted")
-print("-" * 75)
-for _ in range(7):
-    rand_index = random.randint(0, len(bert_output) - 1)
-    logits = bert_output.logits
-    pred = torch.argmax(logits, dim=1).numpy()[0]
-    print(pred)
-    print(type(pred))
-    true_class_code = test_text[rand_index]
-    print(
-        f"{txt_class_names[true_class_code]:<25} {"|":<15} {txt_class_names[pred]}"
-    )
-
-# %%
-bert_network_score = accuracy_score(y_txt_small, y_codes_predict_bert)
-bert_network_conf = confusion_matrix(y_txt_small, y_codes_predict_bert)
-bert_network_report = classification_report(y_txt_small, y_codes_predict_bert)
-
-print(bert_network_report)
-
+for i in range(20):
+    print(f"\033[93mSource:\033[0m {text[i]}")
+    true_class_code = formated_txt_test_list[i][1]
+    pred_class_code = np.argmax(predictions[i])
+    print(f"\033[32mtrue:\033[0m {txt_class_names[true_class_code]} | \033[31mpred:\033[0m {txt_class_names[pred_class_code]}")
+    print()
